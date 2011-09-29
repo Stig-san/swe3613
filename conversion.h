@@ -8,8 +8,11 @@ using namespace std;
 
 void printmenu();
 
-list<string> getIcd10( sqlite3_stmt *count, sqlite3_stmt *getIcd, string icd9);
+list<string> getIcd10( sqlite3_stmt *count, sqlite3_stmt* getIcd, string icd9);
 
-void sqlOpen (sqlite3 *db, sqlite3_stmt *getIcd, sqlite3_stmt *count);
+list<string> byIcd9 (string icd9);
+void printlist (list<string> icd10); 
+
+string sanitize (string input);
 
 #endif
