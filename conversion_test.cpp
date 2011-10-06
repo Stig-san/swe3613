@@ -15,7 +15,8 @@ list<string> icd10ActualCodeList;
 TEST(ConversionTest, OneToOne)
 {
 	sqlite3_stmt *getIcd, *count;
-	sqlite3 *db;	
+	sqlite3 *db;
+	sqlite3_open("icd.db", &db);
 
 	char sql[75];
   	char sql2[75];
@@ -23,10 +24,9 @@ TEST(ConversionTest, OneToOne)
  	sprintf(sql2, "%s","SELECT COUNT(Icd10) FROM Convert WHERE Icd9=?");
  	sqlite3_prepare_v2(db,sql,-1,&getIcd,0);
  	sqlite3_prepare_v2(db,sql2,-1,&count,0);
-	icd10TestCode = "A000";													//Item to compare to
+ 	icd10TestCodeList.push_back("A000");
 	icd10ActualCodeList = getIcd10(count,getIcd,"0010");					//Item from function to compare with
-	icd10ActualCode = icd10ActualCodeList.back();							//Assign item to a string
-	EXPECT_EQ(icd10TestCode, icd10ActualCode);
+	EXPECT_EQ(icd10TestCodeList.back(), icd10ActualCodeList.back());
 	icd10TestCodeList.clear();
 }
 
@@ -34,6 +34,7 @@ TEST(ConversionTest, OneToMany)
 {
 	sqlite3_stmt *getIcd, *count;
 	sqlite3 *db;
+	sqlite3_open("icd.db", &db);
 
 	char sql[75];
   	char sql2[75];

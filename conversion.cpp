@@ -4,8 +4,6 @@
 #include <list>
 #include <sqlite3.h>
 #include "conversion.h"
-//#include <QCoreApplication>
-//#include <QDeclarativeComponent>
 
 
 using namespace std;
@@ -24,6 +22,7 @@ void printmenu ()
 {
   cout<<"What would you like to do?"<<endl;
   cout<<"1: Convert an ICD-9 code to an ICD-10 code"<<endl;
+  cout<<"2: Search for codes by description"<<endl;
   cout<<"9: Quit"<<endl;
 }
 
@@ -52,7 +51,6 @@ list<string> getIcd10(sqlite3_stmt* count, sqlite3_stmt* getIcd, string icd9)
 list<string> byIcd9(string icd9)
   {
      list<string> output;
-
      sqlite3 *db;
      sqlite3_open("icd.db", &db);
      sqlite3_stmt *getIcd, *count;
@@ -86,14 +84,82 @@ string sanitize(string input)
     return input;
  
   }
-/*
-Q_INVOKABLE string tempReturn(list<string> input) // TEMPORARY FIX THIS SOON
-{
-  string output;
-  for(int i=0; i<input.size(); i++)
+
+
+int setDx(string icd, string dx, int kind )
   {
-    output+=input[i];
+
+     // return codes: 0-returned normally, 1-incorrect kind 2-DX code already in use
+
+     string table; 
+     string id="Id";
+     sqlite3 *db;
+     sqlite3_open("icd.db", &db);
+     sqlite3_stmt *update;
+     char sql[75];
+     sprintf(sql, "%s","Update ? Set DX=? WHERE ?=?");
+     sqlite3_prepare_v2(db,sql,-1,&update,0);
+     
+     if(kind!=9 || kind!=10)
+     {     
+       sqlite3_finalize(update);
+       sqlite3_close(db); 
+       return 1;   // Throw an error MSG on the GUI?
+     }
+ 
+     else if(kind==9)
+     {
+       table="Icd9";
+     }
+
+     else
+     {
+       table="Icd10";
+     }
+        sqlite3_bind_text(update,1,table.c_str(),-1,SQLITE_STATIC);
+        sqlite3_bind_text(update,2,dx.c_str(),-1,SQLITE_STATIC);
+        sqlite3_bind_text(update,3,id.c_str(),-1,SQLITE_STATIC);
+        sqlite3_bind_text(update,4,icd.c_str(),-1,SQLITE_STATIC); 
+        sqlite3_step(update);
+        sqlite3_reset(update);
+     
+ 
+ 
+     sqlite3_finalize(update);
+     sqlite3_close(db);
+     return 0;
   }
-  return string;
+
+string getDesc(string icd, int kind)
+{
+  
+  string table;
+  string id="Id";
+  sqlite3 *db;
+  sqlite3_open("icd.db", &db);
+  sqlite3_stmt *getDesc;
+  char sql[75];
+  sprintf(sql, "%s","SELECT Desc FROM ? WHERE ?=?");
+  if(kind!=9 || kind!=10)
+  {     
+     sqlite3_finalize(getDesc);
+     sqlite3_close(db); 
+     return "ERROR";   // Throw an error MSG on the GUI?
+  }
+ 
+  else if(kind==9)
+  {
+    table="Icd9";
+  }
+  else
+  {
+    table="Icd10";
+  }
+    sqlite3_bind_text(getDesc,1,table.c_str(),-1,SQLITE_STATIC);
+    sqlite3_bind_text(getDesc,2,id.c_str(),-1,SQLITE_STATIC);
+    sqlite3_bind_text(getDesc,3,icd.c_str(),-1,SQLITE_STATIC);
+    sqlite3_step(getDesc);
+    sqlite3_reset(getDesc);
+
 }
-  */
+ 

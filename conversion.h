@@ -15,4 +15,8 @@ void printlist (list<string> icd10);
 
 string sanitize (string input);
 
+int setDx(string icd, string dx, int kind);
+
+string getDesc(string icd, int kind);
+
 #endif
